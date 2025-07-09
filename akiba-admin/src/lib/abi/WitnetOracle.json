@@ -1,0 +1,744 @@
+[
+    {
+        "inputs": [
+            {
+                "internalType": "contract WitnetOracle",
+                "name": "_witnet",
+                "type": "address"
+            },
+            {
+                "internalType": "address",
+                "name": "_operator",
+                "type": "address"
+            }
+        ],
+        "stateMutability": "nonpayable",
+        "type": "constructor"
+    },
+    {
+        "inputs": [],
+        "name": "EmptyBuffer",
+        "type": "error"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "uint256",
+                "name": "index",
+                "type": "uint256"
+            },
+            {
+                "internalType": "uint256",
+                "name": "range",
+                "type": "uint256"
+            }
+        ],
+        "name": "IndexOutOfBounds",
+        "type": "error"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "uint256",
+                "name": "length",
+                "type": "uint256"
+            }
+        ],
+        "name": "InvalidLengthEncoding",
+        "type": "error"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "address",
+                "name": "owner",
+                "type": "address"
+            }
+        ],
+        "name": "OwnableInvalidOwner",
+        "type": "error"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "address",
+                "name": "account",
+                "type": "address"
+            }
+        ],
+        "name": "OwnableUnauthorizedAccount",
+        "type": "error"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "uint256",
+                "name": "read",
+                "type": "uint256"
+            },
+            {
+                "internalType": "uint256",
+                "name": "expected",
+                "type": "uint256"
+            }
+        ],
+        "name": "UnexpectedMajorType",
+        "type": "error"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "uint256",
+                "name": "unexpected",
+                "type": "uint256"
+            }
+        ],
+        "name": "UnsupportedMajorType",
+        "type": "error"
+    },
+    {
+        "anonymous": false,
+        "inputs": [
+            {
+                "indexed": true,
+                "internalType": "address",
+                "name": "previousOwner",
+                "type": "address"
+            },
+            {
+                "indexed": true,
+                "internalType": "address",
+                "name": "newOwner",
+                "type": "address"
+            }
+        ],
+        "name": "OwnershipTransferStarted",
+        "type": "event"
+    },
+    {
+        "anonymous": false,
+        "inputs": [
+            {
+                "indexed": true,
+                "internalType": "address",
+                "name": "previousOwner",
+                "type": "address"
+            },
+            {
+                "indexed": true,
+                "internalType": "address",
+                "name": "newOwner",
+                "type": "address"
+            }
+        ],
+        "name": "OwnershipTransferred",
+        "type": "event"
+    },
+    {
+        "anonymous": false,
+        "inputs": [
+            {
+                "indexed": false,
+                "internalType": "uint256",
+                "name": "blockNumber",
+                "type": "uint256"
+            },
+            {
+                "indexed": false,
+                "internalType": "uint256",
+                "name": "evmTxGasPrice",
+                "type": "uint256"
+            },
+            {
+                "indexed": false,
+                "internalType": "uint256",
+                "name": "evmRandomizeFee",
+                "type": "uint256"
+            },
+            {
+                "indexed": false,
+                "internalType": "uint256",
+                "name": "witnetQueryId",
+                "type": "uint256"
+            },
+            {
+                "components": [
+                    {
+                        "internalType": "uint8",
+                        "name": "committeeSize",
+                        "type": "uint8"
+                    },
+                    {
+                        "internalType": "uint64",
+                        "name": "witnessingFeeNanoWit",
+                        "type": "uint64"
+                    }
+                ],
+                "indexed": false,
+                "internalType": "struct WitnetV2.RadonSLA",
+                "name": "witnetQuerySLA",
+                "type": "tuple"
+            }
+        ],
+        "name": "Randomizing",
+        "type": "event"
+    },
+    {
+        "anonymous": false,
+        "inputs": [
+            {
+                "indexed": false,
+                "internalType": "uint256",
+                "name": "id",
+                "type": "uint256"
+            },
+            {
+                "indexed": false,
+                "internalType": "uint256",
+                "name": "evmReward",
+                "type": "uint256"
+            },
+            {
+                "components": [
+                    {
+                        "internalType": "uint8",
+                        "name": "committeeSize",
+                        "type": "uint8"
+                    },
+                    {
+                        "internalType": "uint64",
+                        "name": "witnessingFeeNanoWit",
+                        "type": "uint64"
+                    }
+                ],
+                "indexed": false,
+                "internalType": "struct WitnetV2.RadonSLA",
+                "name": "witnetSLA",
+                "type": "tuple"
+            }
+        ],
+        "name": "WitnetQuery",
+        "type": "event"
+    },
+    {
+        "anonymous": false,
+        "inputs": [
+            {
+                "indexed": false,
+                "internalType": "uint256",
+                "name": "id",
+                "type": "uint256"
+            },
+            {
+                "indexed": false,
+                "internalType": "uint256",
+                "name": "evmGasPrice",
+                "type": "uint256"
+            }
+        ],
+        "name": "WitnetQueryResponse",
+        "type": "event"
+    },
+    {
+        "anonymous": false,
+        "inputs": [
+            {
+                "indexed": false,
+                "internalType": "uint256",
+                "name": "id",
+                "type": "uint256"
+            },
+            {
+                "indexed": false,
+                "internalType": "uint256",
+                "name": "evmGasPrice",
+                "type": "uint256"
+            },
+            {
+                "indexed": false,
+                "internalType": "uint256",
+                "name": "evmCallbackGas",
+                "type": "uint256"
+            }
+        ],
+        "name": "WitnetQueryResponseDelivered",
+        "type": "event"
+    },
+    {
+        "anonymous": false,
+        "inputs": [
+            {
+                "indexed": false,
+                "internalType": "uint256",
+                "name": "id",
+                "type": "uint256"
+            },
+            {
+                "indexed": false,
+                "internalType": "bytes",
+                "name": "resultCborBytes",
+                "type": "bytes"
+            },
+            {
+                "indexed": false,
+                "internalType": "uint256",
+                "name": "evmGasPrice",
+                "type": "uint256"
+            },
+            {
+                "indexed": false,
+                "internalType": "uint256",
+                "name": "evmCallbackActualGas",
+                "type": "uint256"
+            },
+            {
+                "indexed": false,
+                "internalType": "string",
+                "name": "evmCallbackRevertReason",
+                "type": "string"
+            }
+        ],
+        "name": "WitnetQueryResponseDeliveryFailed",
+        "type": "event"
+    },
+    {
+        "anonymous": false,
+        "inputs": [
+            {
+                "indexed": false,
+                "internalType": "uint256",
+                "name": "id",
+                "type": "uint256"
+            },
+            {
+                "indexed": false,
+                "internalType": "uint256",
+                "name": "evmReward",
+                "type": "uint256"
+            }
+        ],
+        "name": "WitnetQueryRewardUpgraded",
+        "type": "event"
+    },
+    {
+        "stateMutability": "payable",
+        "type": "fallback"
+    },
+    {
+        "inputs": [],
+        "name": "acceptOwnership",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "baseFeeOverheadPercentage",
+        "outputs": [
+            {
+                "internalType": "uint16",
+                "name": "",
+                "type": "uint16"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "class",
+        "outputs": [
+            {
+                "internalType": "string",
+                "name": "",
+                "type": "string"
+            }
+        ],
+        "stateMutability": "pure",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "uint256",
+                "name": "_evmGasPrice",
+                "type": "uint256"
+            }
+        ],
+        "name": "estimateRandomizeFee",
+        "outputs": [
+            {
+                "internalType": "uint256",
+                "name": "",
+                "type": "uint256"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "uint256",
+                "name": "_blockNumber",
+                "type": "uint256"
+            }
+        ],
+        "name": "fetchRandomnessAfter",
+        "outputs": [
+            {
+                "internalType": "bytes32",
+                "name": "",
+                "type": "bytes32"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "uint256",
+                "name": "_blockNumber",
+                "type": "uint256"
+            }
+        ],
+        "name": "fetchRandomnessAfterProof",
+        "outputs": [
+            {
+                "internalType": "bytes32",
+                "name": "_witnetResultRandomness",
+                "type": "bytes32"
+            },
+            {
+                "internalType": "uint64",
+                "name": "_witnetResultTimestamp",
+                "type": "uint64"
+            },
+            {
+                "internalType": "bytes32",
+                "name": "_witnetResultTallyHash",
+                "type": "bytes32"
+            },
+            {
+                "internalType": "uint256",
+                "name": "_witnetResultFinalityBlock",
+                "type": "uint256"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "getLastRandomizeBlock",
+        "outputs": [
+            {
+                "internalType": "uint256",
+                "name": "",
+                "type": "uint256"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "uint256",
+                "name": "_blockNumber",
+                "type": "uint256"
+            }
+        ],
+        "name": "getRandomizeData",
+        "outputs": [
+            {
+                "internalType": "uint256",
+                "name": "_witnetQueryId",
+                "type": "uint256"
+            },
+            {
+                "internalType": "uint256",
+                "name": "_prevRandomizeBlock",
+                "type": "uint256"
+            },
+            {
+                "internalType": "uint256",
+                "name": "_nextRandomizeBlock",
+                "type": "uint256"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "uint256",
+                "name": "_blockNumber",
+                "type": "uint256"
+            }
+        ],
+        "name": "getRandomizeNextBlock",
+        "outputs": [
+            {
+                "internalType": "uint256",
+                "name": "",
+                "type": "uint256"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "uint256",
+                "name": "_blockNumber",
+                "type": "uint256"
+            }
+        ],
+        "name": "getRandomizePrevBlock",
+        "outputs": [
+            {
+                "internalType": "uint256",
+                "name": "",
+                "type": "uint256"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "uint256",
+                "name": "_blockNumber",
+                "type": "uint256"
+            }
+        ],
+        "name": "getRandomizeStatus",
+        "outputs": [
+            {
+                "internalType": "enum WitnetV2.ResponseStatus",
+                "name": "",
+                "type": "uint8"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "uint256",
+                "name": "_blockNumber",
+                "type": "uint256"
+            }
+        ],
+        "name": "isRandomized",
+        "outputs": [
+            {
+                "internalType": "bool",
+                "name": "",
+                "type": "bool"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "owner",
+        "outputs": [
+            {
+                "internalType": "address",
+                "name": "",
+                "type": "address"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "pendingOwner",
+        "outputs": [
+            {
+                "internalType": "address",
+                "name": "",
+                "type": "address"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "uint32",
+                "name": "_range",
+                "type": "uint32"
+            },
+            {
+                "internalType": "uint256",
+                "name": "_nonce",
+                "type": "uint256"
+            },
+            {
+                "internalType": "uint256",
+                "name": "_blockNumber",
+                "type": "uint256"
+            }
+        ],
+        "name": "random",
+        "outputs": [
+            {
+                "internalType": "uint32",
+                "name": "",
+                "type": "uint32"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "randomize",
+        "outputs": [
+            {
+                "internalType": "uint256",
+                "name": "_evmRandomizeFee",
+                "type": "uint256"
+            }
+        ],
+        "stateMutability": "payable",
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "renounceOwnership",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "uint16",
+                "name": "_baseFeeOverheadPercentage",
+                "type": "uint16"
+            }
+        ],
+        "name": "settleBaseFeeOverheadPercentage",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "components": [
+                    {
+                        "internalType": "uint8",
+                        "name": "committeeSize",
+                        "type": "uint8"
+                    },
+                    {
+                        "internalType": "uint64",
+                        "name": "witnessingFeeNanoWit",
+                        "type": "uint64"
+                    }
+                ],
+                "internalType": "struct WitnetV2.RadonSLA",
+                "name": "_witnetQuerySLA",
+                "type": "tuple"
+            }
+        ],
+        "name": "settleWitnetQuerySLA",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "specs",
+        "outputs": [
+            {
+                "internalType": "bytes4",
+                "name": "",
+                "type": "bytes4"
+            }
+        ],
+        "stateMutability": "pure",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "address",
+                "name": "_newOwner",
+                "type": "address"
+            }
+        ],
+        "name": "transferOwnership",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "witnet",
+        "outputs": [
+            {
+                "internalType": "contract WitnetOracle",
+                "name": "",
+                "type": "address"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "witnetQuerySLA",
+        "outputs": [
+            {
+                "components": [
+                    {
+                        "internalType": "uint8",
+                        "name": "committeeSize",
+                        "type": "uint8"
+                    },
+                    {
+                        "internalType": "uint64",
+                        "name": "witnessingFeeNanoWit",
+                        "type": "uint64"
+                    }
+                ],
+                "internalType": "struct WitnetV2.RadonSLA",
+                "name": "",
+                "type": "tuple"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "witnetRadHash",
+        "outputs": [
+            {
+                "internalType": "bytes32",
+                "name": "",
+                "type": "bytes32"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "stateMutability": "payable",
+        "type": "receive"
+    }
+]
