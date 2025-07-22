@@ -1,7 +1,7 @@
 // app/dashboard/page.tsx
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import {
   parseUnits,
   decodeEventLog,
@@ -46,15 +46,24 @@ export default function CreateRaffleAndRandomize() {
   const [autoRequest, setAutoRequest] = useState(true);
   const [lastRoundId, setLastRoundId] = useState<string>("");
 
-
+  // simple validation
+  const rewardValid = useMemo(() => {
+    const n = Number(reward);
+    return Number.isFinite(n) && n > 0;
+  }, [reward]);
 
   async function onSubmit() {
     try {
+      if (!rewardValid) {
+        alert("Reward must be greater than 0");
+        return;
+      }
+
       const now     = Math.floor(Date.now() / 1000);
       const startTs = now + Number(startMin) * 60;
       const durSec  = Number(days) * 86_400;
 
-      const rewardWei = parseUnits(reward || "0", token.decimals);
+      const rewardWei = parseUnits(reward, token.decimals);
       const costWei   = parseUnits(costPts || "0", 18);
 
       // 1) approve ERC20 if needed
@@ -100,7 +109,7 @@ export default function CreateRaffleAndRandomize() {
             if (roundId) break;
           }
         } catch {
-          /* ignore */
+          /* ignore non-matching logs */
         }
       }
 
@@ -141,6 +150,8 @@ export default function CreateRaffleAndRandomize() {
     }
   }
 
+  const submitDisabled = isPending || !rewardValid;
+
   return (
     <main className="max-w-3xl mx-auto p-6">
       <Card title="Create Raffle (and optionally request randomness)">
@@ -179,6 +190,9 @@ export default function CreateRaffleAndRandomize() {
                 value={reward}
                 onChange={(e) => setReward(e.target.value)}
               />
+              {!rewardValid && reward !== "" && (
+                <p className="mt-1 text-xs text-red-600">Enter an amount &gt; 0</p>
+              )}
             </div>
           </div>
 
@@ -238,7 +252,7 @@ export default function CreateRaffleAndRandomize() {
             </label>
           </div>
 
-          <Button disabled={isPending} type="submit">
+          <Button disabled={submitDisabled} type="submit">
             {isPending ? "Submitting…" : "Create"}
           </Button>
 
