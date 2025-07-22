@@ -1,36 +1,65 @@
 // app/dashboard/draw/page.tsx
-'use client'
-import { useState } from 'react'
-import { useWriteContract } from 'wagmi'
-import abi from '@/lib/abi/RaffleManager.json'
-import { Input } from '@/components/ui/input'
-import { Button } from '@/components/ui/button'
+"use client";
 
-const RAFFLE_MANAGER = '0xD75dfa972C6136f1c594Fec1945302f885E1ab29'
+import { useState } from "react";
+import { useWriteContract } from "wagmi";
+import { Button } from "@/components/ui/button";
+import { useAdminRounds } from "@/hooks/useAdminRounds";
+import AdminRoundRow from "@/components/admin-round-row";
+import abi from "@/lib/abi/RaffleManager.json";
+import { RAFFLE_MANAGER } from "@/lib/raffle-contract";
 
-export default function DrawWinner() {
-  const { writeContractAsync, isPending } = useWriteContract()
-  const [roundId, setRound] = useState('')
+export default function DrawPage() {
+  const { data, isLoading, isError, refetch } = useAdminRounds();
+  const { writeContractAsync } = useWriteContract();
+  const [drawingId, setDrawingId] = useState<number | null>(null);
 
-  const draw = () =>
-    writeContractAsync({
-      address: RAFFLE_MANAGER,
-      abi: abi.abi,
-      functionName: 'drawWinner',
-      args: [BigInt(roundId)],
-    }).then(() => alert('Winner drawn 🎉'))
+  const draw = async (id: number) => {
+    try {
+      setDrawingId(id);
+      await writeContractAsync({
+        address: RAFFLE_MANAGER,
+        abi: abi.abi,
+        functionName: "drawWinner",
+        args: [BigInt(id)],
+      });
+      alert(`Winner drawn for #${id} 🎉`);
+      await refetch();
+    } catch (e: any) {
+      alert(e?.message ?? "Draw failed");
+    } finally {
+      setDrawingId(null);
+    }
+  };
 
   return (
-    <section className="p-6 bg-white rounded-lg shadow">
-      <h1 className="text-xl font-bold mb-4">Draw Winner</h1>
-      <Input
-        placeholder="Round ID"
-        value={roundId}
-        onChange={e => setRound(e.target.value)}
-      />
-      <Button onClick={draw} disabled={isPending || !roundId}>
-        {isPending ? 'Drawing…' : 'Draw'}
+    <main className="p-6 space-y-6 max-w-4xl mx-auto">
+      <h1 className="text-2xl font-bold">Draw Winners</h1>
+      <p className="text-sm text-gray-600">
+        Manage active and ended raffles. Draw a winner once a round is ended or max tickets reached.
+      </p>
+
+      {isLoading && <p>Loading raffles…</p>}
+      {isError && <p className="text-red-600">Failed to load raffles.</p>}
+
+      {!isLoading && data && data.length === 0 && (
+        <p>No rounds found.</p>
+      )}
+
+      <div className="space-y-3">
+        {data?.map((r) => (
+          <AdminRoundRow
+            key={r.id}
+            round={r}
+            onDraw={draw}
+            drawing={drawingId === r.id}
+          />
+        ))}
+      </div>
+
+      <Button variant="default" size="sm" onClick={() => refetch()}>
+        Refresh
       </Button>
-    </section>
-  )
+    </main>
+  );
 }
