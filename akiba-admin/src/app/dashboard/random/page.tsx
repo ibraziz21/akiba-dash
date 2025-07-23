@@ -17,7 +17,7 @@ export default function RequestRandom() {
   const isPending = status === 'pending'
 
   const [roundId, setRoundId] = useState('')
-  const [fee, setFee]         = useState('0.05') // CELO – matches RNG costs
+  const [fee, setFee]         = useState('0.011') // CELO – matches RNG costs
 
   const request = async () => {
     try {
