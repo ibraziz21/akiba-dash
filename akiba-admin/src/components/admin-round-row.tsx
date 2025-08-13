@@ -23,6 +23,9 @@ export default function AdminRoundRow({ round, onDraw, drawing }: Props) {
       ? `${Math.floor(round.endsIn / 86_400)}d`
       : `${Math.floor(round.endsIn / 3600)}h ${Math.floor((round.endsIn % 3600) / 60)}m`;
 
+  // ✅ Can draw if not drawn AND (ended OR max tickets reached)
+  const canDraw = !round.drawn && (round.endsIn <= 0 || round.maxReached);
+
   return (
     <div className="rounded-lg border p-4 flex flex-col md:flex-row md:items-center md:justify-between gap-3 bg-white shadow-sm">
       <div>
@@ -41,7 +44,7 @@ export default function AdminRoundRow({ round, onDraw, drawing }: Props) {
 
       <Button
         size="sm"
-        disabled={drawing || round.drawn || !round.active}
+        disabled={drawing || !canDraw}
         onClick={() => onDraw(round.id)}
       >
         {round.drawn ? "Drawn" : drawing ? "Drawing…" : "Draw winner"}
