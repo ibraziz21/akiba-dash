@@ -16,12 +16,15 @@ type PastRaffle = {
   winner: string | null;
   winnerReward: string | null;
   winnerTs: number | null;
+  // ✅ new (optional to avoid breaking while backend rolls out)
+  totalTickets?: number;
+  maxTickets?: number;
 };
 
 export default function PastRafflesPage() {
-  const [data, setData]   = useState<PastRaffle[]>([]);
+  const [data, setData] = useState<PastRaffle[]>([]);
   const [loading, setLoading] = useState(true);
-  const [err, setErr]     = useState<string | null>(null);
+  const [err, setErr] = useState<string | null>(null);
 
   useEffect(() => {
     fetch('/api/admin/past-raffles')
@@ -49,7 +52,7 @@ export default function PastRafflesPage() {
   };
 
   if (loading) return <p className="p-6">Loading…</p>;
-  if (err)     return <p className="p-6 text-red-500">{err}</p>;
+  if (err) return <p className="p-6 text-red-500">{err}</p>;
 
   return (
     <main className="max-w-5xl mx-auto p-6">
@@ -61,6 +64,8 @@ export default function PastRafflesPage() {
                 <th className="py-2 pr-4">Round</th>
                 <th className="py-2 pr-4">Token</th>
                 <th className="py-2 pr-4">Total Reward</th>
+                {/* ✅ new column */}
+                <th className="py-2 pr-4">Tickets</th>
                 <th className="py-2 pr-4">Duration</th>
                 <th className="py-2 pr-4">Winner</th>
                 <th className="py-2 pr-4">Won</th>
@@ -73,6 +78,14 @@ export default function PastRafflesPage() {
                   <td className="py-2 pr-4 font-medium">#{r.roundId}</td>
                   <td className="py-2 pr-4">{r.symbol}</td>
                   <td className="py-2 pr-4">{r.rewardPool} {r.symbol}</td>
+                  {/* ✅ render "total / max" with a safe fallback */}
+                  <td className="py-2 pr-4">
+                    {typeof r.totalTickets === 'number' && typeof r.maxTickets === 'number'
+                      ? `${r.totalTickets}/${r.maxTickets}`
+                      : typeof r.totalTickets === 'number'
+                        ? `${r.totalTickets}/?`
+                        : '—'}
+                  </td>
                   <td className="py-2 pr-4">{fmtDur(r.durationSec)}</td>
                   <td className="py-2 pr-4">{shorten(r.winner)}</td>
                   <td className="py-2 pr-4">

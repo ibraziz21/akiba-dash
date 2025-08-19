@@ -19,34 +19,53 @@ export async function getRoundCount() {
   return Number(count);
 }
 
-/** getActiveRound(id) or fallback to getRound if you have it.
+/** getActiveRound(id) or fallback to getRound if available.
  * RaffleManager.getActiveRound returns:
  * [roundId, start, end, maxTickets, totalTickets, rewardToken, rewardPool, ticketCostPoints, winnersSelected]
  */
 export async function fetchRounds(ids: bigint[]) {
-  const multicallRes = await publicClient.multicall({
+  const calls = ids.map((id) => ({
+    address: RAFFLE_MANAGER,
+    abi: raffleAbi.abi as Abi,
+    functionName: "getActiveRound" as any,
+    args: [id],
+  }));
+
+  const resActive = await publicClient.multicall({
     allowFailure: true,
-    contracts: ids.map((id) => ({
-      address: RAFFLE_MANAGER,
-      abi: raffleAbi.abi as Abi,
-      functionName: "getActiveRound",
-      args: [id],
-    })),
+    contracts: calls,
   });
 
-  return ids.map((id, i) => {
-    const r = multicallRes[i];
-    if (r.status !== "success") return null;
-    const [roundId, start, end, maxT, totalT, _rtok, _rpool, _cost, winnersSel] = r.result as any[];
-    return {
+  // Fallback for ended rounds
+  const callsRound = ids.map((id) => ({
+    address: RAFFLE_MANAGER,
+    abi: raffleAbi.abi as Abi,
+    functionName: "getRound" as any,
+    args: [id],
+  }));
+  const resRound = await publicClient.multicall({
+    allowFailure: true,
+    contracts: callsRound,
+  });
+
+  const out: AdminRound[] = [];
+  for (let i = 0; i < ids.length; i++) {
+    const r = resActive[i].status === "success" ? resActive[i] : resRound[i];
+    if (r.status !== "success") continue;
+    const [roundId, start, end, maxT, totalT, rewardToken, rewardPool, _cost, winnersSel] = r.result as any[];
+    out.push({
       id: Number(roundId),
       starts: Number(start),
       ends: Number(end),
       maxTickets: Number(maxT),
       totalTickets: Number(totalT),
       winnersSelected: Boolean(winnersSel),
-    };
-  }).filter(Boolean) as AdminRound[];
+      // ✅ new: expose reward data for UI
+      rewardToken: rewardToken as Address,
+      rewardPool: BigInt(rewardPool),
+    });
+  }
+  return out;
 }
 
 export type AdminRound = {
@@ -56,4 +75,7 @@ export type AdminRound = {
   maxTickets: number;
   totalTickets: number;
   winnersSelected: boolean;
+  // ✅ new
+  rewardToken: Address;
+  rewardPool: bigint; // raw units (use token decimals to format)
 };
