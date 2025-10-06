@@ -8,7 +8,8 @@ const tabs = [
   { href: '/dashboard',        label: 'Create'  },
   { href: '/dashboard/random', label: 'Random'  },
   { href: '/dashboard/draw',   label: 'Draw'    },
-  { href: '/dashboard/past-raffles',   label: 'Past Raffles'    },
+  { href: '/dashboard/past-raffles',   label: 'Past Raffles v3'    },
+  { href: '/dashboard/past-raffles-v2',   label: 'Past Raffles V2'    },
 ]
 
 export default function AdminNav() {
