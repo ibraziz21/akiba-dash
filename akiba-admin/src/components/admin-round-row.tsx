@@ -1,14 +1,11 @@
 // components/admin-round-row.tsx
 "use client";
 
-import { CombinedRound } from "@/hooks/useAdminRounds";
+import { DrawableRound as CombinedRound } from "@/hooks/useDrawableRounds";
 import { Button } from "@/components/ui/button";
 
 const typeLabel = (t: number) =>
-  t === 0 ? "Single" :
-  t === 1 ? "Top-3"  :
-  t === 2 ? "Top-5"  :
-  t === 3 ? "Physical" : `Type ${t}`;
+  t === 0 ? "Single" : t === 1 ? "Top-3" : t === 2 ? "Top-5" : t === 3 ? "Physical" : `Type ${t}`;
 
 type Props = {
   round: CombinedRound;
@@ -17,20 +14,13 @@ type Props = {
 };
 
 export default function AdminRoundRow({ round, onDraw, drawing }: Props) {
-  const status = round.drawn
-    ? "Winner selected"
-    : round.active
-      ? "Active"
-      : "Ended";
+  const status = round.drawn ? "Winner selected" : round.ended ? "Ended" : "Active";
+  const endsLabel =
+    round.endsIn <= 0 ? "Ended" :
+    round.endsIn >= 86_400 ? `${Math.floor(round.endsIn / 86_400)}d` :
+    `${Math.floor(round.endsIn / 3600)}h ${Math.floor((round.endsIn % 3600) / 60)}m`;
 
-  const endsLabel = round.endsIn <= 0
-    ? "Ended"
-    : round.endsIn >= 86_400
-      ? `${Math.floor(round.endsIn / 86_400)}d`
-      : `${Math.floor(round.endsIn / 3600)}h ${Math.floor((round.endsIn % 3600) / 60)}m`;
-
-  // unchanged: can draw if not drawn AND (ended OR max tickets reached)
-  const canDraw = !round.drawn && (round.endsIn <= 0 || round.maxReached);
+  const canDraw = !round.drawn && (round.ended || round.maxReached);
 
   return (
     <div className="rounded-lg border p-4 flex flex-col md:flex-row md:items-center md:justify-between gap-3 bg-white shadow-sm">
@@ -44,17 +34,11 @@ export default function AdminRoundRow({ round, onDraw, drawing }: Props) {
           Tickets: {round.totalTickets}/{round.maxTickets}
           {round.maxReached && <span className="ml-1 text-[#219653]">Max reached</span>}
           {" · "}
-          Joins: {round.participantEvents}
-          {" · "}
           Ends in: {endsLabel}
         </p>
       </div>
 
-      <Button
-        size="sm"
-        disabled={drawing || !canDraw}
-        onClick={() => onDraw(round.id)}
-      >
+      <Button size="sm" disabled={drawing || !canDraw} onClick={() => onDraw(round.id)}>
         {round.drawn ? "Drawn" : drawing ? "Drawing…" : "Draw winner"}
       </Button>
     </div>
