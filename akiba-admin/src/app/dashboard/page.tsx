@@ -370,7 +370,7 @@ const [winners, setWinners] = useState("1");
       onChange={(e) => setCardTitle(e.target.value)}
     />
     <p className="mt-1 text-xs text-gray-500">
-      Shown on the raffle card. If empty, frontend falls back to "{`rewardPool token`}".
+      Shown on the raffle card. If empty, frontend falls back to {`rewardPool token`}.
     </p>
   </div>
 
