@@ -72,7 +72,7 @@ export default function DrawPage() {
                       {r.maxReached ? <span className="ml-1 text-green-600">Max reached</span> : null}
                       {" · "}Ends: {endsLabel}
                       {" · "}
-                      {r.meetsThreshold ? <span className="text-green-700">≥20% threshold</span> : <span className="text-amber-700">&lt;20% threshold</span>}
+                      {r.meetsThreshold ? <span className="text-green-700">10% threshold</span> : <span className="text-amber-700">&lt;10% threshold</span>}
                     </p>
                   </div>
 

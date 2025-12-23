@@ -169,8 +169,8 @@ export function useDrawableRounds() {
         const ended    = end > 0 && now > end;
         const maxed    = maxT > 0 && tot >= maxT;
 
-        const meetsThreshold = maxT > 0 && (tot * 100) >= (maxT * 20);
-        const underThreshold = maxT > 0 && (tot * 100) <  (maxT * 20);
+        const meetsThreshold = maxT > 0 && (tot * 100) >= (maxT * 10);
+        const underThreshold = maxT > 0 && (tot * 100) <  (maxT * 10);
 
         return {
           id,
